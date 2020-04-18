@@ -15,6 +15,12 @@ class PostListView(ListView):
 
 def post_list(request):
     object_list = Post.published.all()
+    tag = None
+
+    if tag_slug:
+        tag = get_objects_or_404(Tag, slug=tag_slug)
+        object_list = object_list.filter(tags__in=[tag])
+
     paginator = Paginator(object_list, 3) # 3 posts in each page
     page = request.GET.get('page')
     try:
@@ -27,7 +33,8 @@ def post_list(request):
         posts = paginator.page(paginator.num_pages)
     return render(request, 'blog/post/list.html',
                   {'page': page,
-                  'posts': posts})
+                  'posts': posts,
+                  'tag': tag})
 
 
 def post_detail(request, year, month, day, post):
@@ -55,11 +62,17 @@ def post_detail(request, year, month, day, post):
     else:
         comment_form = CommentForm()
 
+    post_tags_ids = post.tags.values_list('id', flat=True)
+    similar_posts = Post.published.filter(tags__in=post_tags_ids) \
+                                  .exclude(id=post.id)
+    similar_posts = similar_posts.annotate(same_tags=Count('tags')) \
+                                 .order_by('-same_tags', '-publish')[:4]
     return render(request, 'blog/post/detail.html',
                            {'post': post,
                            'comments': comments,
                            'new_comment': new_comment,
-                           'comment_form': comment_form})
+                           'comment_form': comment_form,
+                           'similar_posts': similar_posts})
 
 
 def post_share(request, post_id):

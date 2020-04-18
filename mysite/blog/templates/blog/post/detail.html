@@ -34,6 +34,14 @@
     {% endfor %}
   {% endfor %}
 
+  <h2>Similar posts</h2>
+  {% for post in similar_posts %}
+    <p>
+      <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+    </p>
+  {% empty %}
+    There are no similar posts yet.
+  {% endfor %}
   {% if new_comment %}
     <h2>Your comment has been added.</h2>
   {% else %}
@@ -44,5 +52,5 @@
       <p><input type="submit" value="Add comment"/></p>
     </form>
   {% endif %}
-  
+
 {% endblock %}
