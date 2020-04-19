@@ -13,7 +13,7 @@ class PostListView(ListView):
     paginate_by = 3
     template_name = 'blog/post/list.html'
 
-def post_list(request):
+def post_list(request, tag_slug=None):
     object_list = Post.published.all()
     tag = None
 
